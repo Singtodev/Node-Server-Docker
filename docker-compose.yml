@@ -1,0 +1,46 @@
+version: '3' # docker version
+services:
+  db:
+    image: mysql:latest
+    container_name: db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tutorial
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_test:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+    - ./conf.d:/etc/nginx/conf.d
+    depends_on:
+    - node-server
+    ports:
+      - 8000:8000
+  # container name
+  node-server:
+    image: node-server
+    # container_name: node
+    build: 
+      context: .
+      dockerfile: dockerfile
+    # ports:
+    #   - "8000:8000" # map port
+volumes:
+  mysql_data_test: 
+    driver: local
